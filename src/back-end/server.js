@@ -50,7 +50,7 @@ app.get('/getUsers', (req, res) => {
 
 // Serve frontend files
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'front-end', 'index.html'));
+    res.sendFile(path.join(__dirname, '..', 'front-end', 'index.html'));
 });
 
 app.listen(3000, () => {
