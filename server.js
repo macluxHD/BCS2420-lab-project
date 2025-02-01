@@ -1,33 +1,35 @@
 const express = require('express');
-const mysql = require('mysql');
+const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
+const path = require('path');
+
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
-// Database connection (intentionally vulnerable)
-const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'vulnerable_db'
-});
-db.connect(err => {
-    if (err) throw err;
-    console.log('Connected to MySQL');
+// Connect to SQLite database (or create if it doesn't exist)
+const db = new sqlite3.Database('vulnerable.db', (err) => {
+    if (err) {
+        console.error('Failed to connect to SQLite:', err.message);
+    } else {
+        console.log('Connected to SQLite database');
+    }
 });
 
 // Vulnerable login (SQL Injection possible)
 app.post('/login', (req, res) => {
     let username = req.body.username;
     let password = req.body.password;
-    let query = `SELECT * FROM users WHERE username='${username}' AND password='${password}'`;
-    
-    db.query(query, (err, result) => {
-        if (err) throw err;
-        if (result.length > 0) {
+    let query = `SELECT * FROM users WHERE username='${username}' AND password='${password}'`; // SQL Injection Vulnerability
+
+    db.all(query, [], (err, rows) => {
+        if (err) {
+            res.status(500).send('Database error');
+            return;
+        }
+        if (rows.length > 0) {
             res.send('Login successful');
         } else {
             res.send('Invalid credentials');
@@ -37,15 +39,18 @@ app.post('/login', (req, res) => {
 
 // Unauthenticated API endpoint (exposes user data)
 app.get('/getUsers', (req, res) => {
-    db.query('SELECT * FROM users', (err, result) => {
-        if (err) throw err;
-        res.json(result);
+    db.all('SELECT * FROM users', [], (err, rows) => {
+        if (err) {
+            res.status(500).send('Database error');
+            return;
+        }
+        res.json(rows);
     });
 });
 
 // Serve frontend files
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/public/index.html');
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.listen(3000, () => {
