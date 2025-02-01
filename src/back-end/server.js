@@ -7,7 +7,7 @@ const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(express.static('front-end'));
+app.use(express.static('src/front-end'));
 
 // Connect to SQLite database (or create if it doesn't exist)
 const db = new sqlite3.Database('vulnerable.db', (err) => {
