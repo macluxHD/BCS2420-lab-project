@@ -24,18 +24,18 @@ const db = new sqlite3.Database('vulnerable.db', (err) => {
 app.post('/login', (req, res) => {
     let username = req.body.username;
     let password = req.body.password;
-    let query = `SELECT * FROM users WHERE username='${username}' AND password='${password}'`; // SQL Injection Vulnerability
 
-    db.all(query, [], (err, rows) => {
+    // 🔴 Intentionally allowing SQL Injection
+    let query = `SELECT * FROM users WHERE username='${username}' AND password='${password}';`;
+    console.log("Executing SQL Query:", query);
+
+    db.exec(query, function (err) {
         if (err) {
+            console.error("SQL Error:", err.message);
             res.status(500).send('Database error');
             return;
         }
-        if (rows.length > 0) {
-            res.send('Login successful');
-        } else {
-            res.send('Invalid credentials');
-        }
+        res.send('Login successful (or SQL command executed)');
     });
 });
 
@@ -59,7 +59,7 @@ app.listen(3000, () => {
     console.log('Server running on port 3000');
 });
 
-const wss = new ws.WebSocketServer({ port: 4000}) // (2)
+const wss = new ws.WebSocketServer({ port: 4000 }) // (2)
 wss.on('connection', (client) => {
     console.log('Client connected !')
     client.on('message', (msg) => {    // (3)
