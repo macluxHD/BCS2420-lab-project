@@ -7,7 +7,7 @@ const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(express.static('public'));
+app.use(express.static('front-end'));
 
 // Connect to SQLite database (or create if it doesn't exist)
 const db = new sqlite3.Database('vulnerable.db', (err) => {
@@ -50,7 +50,7 @@ app.get('/getUsers', (req, res) => {
 
 // Serve frontend files
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'front-end', 'index.html'));
 });
 
 app.listen(3000, () => {
