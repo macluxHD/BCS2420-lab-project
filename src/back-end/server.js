@@ -74,6 +74,3 @@ function broadcast(msg) {       // (4)
         }
     }
 }
-app.get('/chat', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'front-end', 'chat.html'));
-});
