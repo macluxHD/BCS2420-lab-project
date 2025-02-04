@@ -25,14 +25,15 @@ const sqlScript = `
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
-    password TEXT NOT NULL
+    password TEXT NOT NULL,
+    isAdmin INTEGER DEFAULT 0
 );
 
-INSERT INTO users (username, password) VALUES
-('admin', 'password123'), 
-('user1', '123456'),
-('username', 'password'),
-('user2', 'qwerty');
+INSERT INTO users (username, password, isAdmin) VALUES
+('admin', 'password123', 1), 
+('user1', '123456', 0),
+('username', 'password', 0),
+('user2', 'qwerty', 0);
 `;
 
 db.exec(sqlScript, (err) => {
