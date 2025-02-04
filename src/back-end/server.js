@@ -12,20 +12,15 @@ app.use(bodyParser.json());
 app.use(express.static('src/front-end/public'));
 
 // Connect to SQLite database (or create if it doesn't exist)
-const db = new sqlite3.Database('vulnerable.db', (err) => {
-    if (err) {
-        console.error('Failed to connect to SQLite:', err.message);
-    } else {
-        console.log('Connected to SQLite database');
-    }
+const db = new sqlite3.Database('vulnerable.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
+    if (err) console.error(err.message);
+    console.log('Connected to SQLite database');
 });
 
 // Vulnerable login (SQL Injection possible)
 app.post('/login', (req, res) => {
     let username = req.body.username;
     let password = req.body.password;
-
-    // 🔴 Intentionally allowing SQL Injection
     let query = `SELECT * FROM users WHERE username='${username}' AND password='${password}';`;
     console.log("Executing SQL Query:", query);
 
@@ -35,12 +30,26 @@ app.post('/login', (req, res) => {
             res.status(500).send('Database error');
             return;
         }
-        res.send('Login successful (or SQL command executed)');
+
+        // Check if authentication still works
+        db.all(`SELECT * FROM users WHERE username='${username}' AND password='${password}';`, (err, rows) => {
+            if (err) {
+                console.error("SQL Error:", err.message);
+                res.status(500).send('Database error');
+                return;
+            }
+            if (rows.length > 0) {
+                res.send('Login successful');
+            } else {
+                res.send('Invalid credentials');
+            }
+        });
     });
 });
 
+
 // Unauthenticated API endpoint (exposes user data)
-app.get('/getUsers', (req, res) => {
+app.get('/users', (req, res) => {
     db.all('SELECT * FROM users', [], (err, rows) => {
         if (err) {
             res.status(500).send('Database error');
