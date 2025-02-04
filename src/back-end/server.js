@@ -50,6 +50,10 @@ app.get('/getUsers', (req, res) => {
     });
 });
 
+app.get('/signup', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'front-end', 'signup.html'));
+});
+
 // Serve frontend files
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'front-end', 'index.html'));
