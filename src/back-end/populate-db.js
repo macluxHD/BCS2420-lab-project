@@ -4,7 +4,7 @@ const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 
 // Name
-const dbFile = 'vulnerable.db';
+const dbFile = './data/vulnerable.db';
 
 // Delete existing database file to overwrite
 if (fs.existsSync(dbFile)) {

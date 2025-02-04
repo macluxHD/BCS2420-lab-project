@@ -2,7 +2,7 @@
 const sqlite3 = require('sqlite3').verbose();
 
 // Database file
-const dbFile = 'vulnerable.db';
+const dbFile = './data/vulnerable.db';
 
 // Load the database
 const db = new sqlite3.Database(dbFile, (err) => {

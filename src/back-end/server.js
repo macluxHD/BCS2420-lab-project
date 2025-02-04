@@ -12,7 +12,7 @@ app.use(bodyParser.json());
 app.use(express.static('src/front-end/public'));
 
 // Connect to SQLite database (or create if it doesn't exist)
-const db = new sqlite3.Database('vulnerable.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
+const db = new sqlite3.Database('./data/vulnerable.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
     if (err) console.error(err.message);
     console.log('Connected to SQLite database');
 });
