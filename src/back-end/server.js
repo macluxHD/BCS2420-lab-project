@@ -50,13 +50,21 @@ app.get('/getUsers', (req, res) => {
     });
 });
 
+// Serve frontend files
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'front-end', 'index.html'));
+});
+
 app.get('/signup', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'front-end', 'signup.html'));
 });
 
-// Serve frontend files
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'front-end', 'index.html'));
+app.get('/chat', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'front-end', 'chat.html'));
+});
+
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'front-end', 'admin.html'));
 });
 
 app.listen(3000, () => {
