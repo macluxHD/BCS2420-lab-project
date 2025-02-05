@@ -27,7 +27,6 @@ app.post('/login', (req, res) => {
     let username = req.body.username;
     let password = req.body.password;
     let query = `SELECT * FROM users WHERE username='${username}' AND password='${password}';`;
-    let checkUserQuery = `SELECT * FROM users WHERE username='${username}';`;
     console.log("Executing SQL Query:", query);
 
     db.exec(query, function (err) {
@@ -38,34 +37,45 @@ app.post('/login', (req, res) => {
         }
 
         // Check if authentication still works
-        db.all(checkUserQuery, (err, rows) => {
+        // MY CHANGES START HERE!!!!!!!!
+        db.get(`SELECT * FROM users WHERE username = ?;`, [username], (err, row) => {
             if (err) {
                 console.error("SQL Error:", err.message);
                 res.status(500).send('Database error');
                 return;
             }
-            if (rows.length === 0) {
+            console.log("Row:", row);
+            console.log("Row Username:", row.username);
+            console.log("Row Password:", row.password);
+
+            console.log(row)
+
+            if (!row) {
                 res.status(400).send('Username does not exist');
                 return;
             }
-            
-            // Now check if the password is correct            
-            db.all(query, (err, rows) => {
-                if (err) {
-                    console.error("SQL Error:", err.message);
-                    res.status(500).send('Database error');
-                    return;
-                }
-                if (rows.length > 0) {
-                    res.send('Login successful');
-                } else {
-                    res.status(400).send('Incorrect password');
-                }
-            });
+
+            //TODO: we check if row.password == password that was inputted into the website
+            if(row.username == username && row.password == password) {
+                res.send('Login successful');}
+            else if(row.username == username && row.password != password) {
+                db.get(`SELECT * FROM users WHERE password = ?;`, [password], (err, passRow) =>{
+                    if (err) {
+                        console.error("SQL Error:", err.message);
+                        res.status(500).send('Database error');
+                        return;
+                    }
+
+                    if(passRow) {
+                        res.send('The given password belongs to user ' + passRow.username);
+                    } else {
+                        res.send('Invalid credentials');
+                    }
+                })
+            }
         });
     });
 });
-
 // Vulnerable signup (SQL Injection possible)
 app.post('/signup', (req, res) => {
     let username = req.body.username;
