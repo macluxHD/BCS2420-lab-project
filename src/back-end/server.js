@@ -45,31 +45,32 @@ app.post('/login', (req, res) => {
                 return;
             }
             console.log("Row:", row);
-            console.log("Row Username:", row.username);
-            console.log("Row Password:", row.password);
+            // console.log("Row Username:", row.username);
+            // console.log("Row Password:", row.password);
 
             console.log(row)
 
             if (!row) {
-                res.status(400).send('Username does not exist');
+                res.status(400).send(`Username <code>${username}</code> does not exist.`);
                 return;
             }
 
             //TODO: we check if row.password == password that was inputted into the website
-            if(row.username == username && row.password == password) {
-                res.send('Login successful');}
-            else if(row.username == username && row.password != password) {
-                db.get(`SELECT * FROM users WHERE password = ?;`, [password], (err, passRow) =>{
+            if (row.username == username && row.password == password) {
+                res.send('Login successful');
+            }
+            else if (row.username == username && row.password != password) {
+                db.get(`SELECT * FROM users WHERE password = ?;`, [password], (err, passRow) => {
                     if (err) {
                         console.error("SQL Error:", err.message);
                         res.status(500).send('Database error');
                         return;
                     }
 
-                    if(passRow) {
-                        res.send('The given password belongs to user ' + passRow.username);
+                    if (passRow) {
+                        res.send(`The given password belongs to user <span class="user-feedback">${passRow.username}</span>`);
                     } else {
-                        res.send('Invalid credentials');
+                        res.send(`Password for username <code>${row.username}</code> is invalid.`);
                     }
                 })
             }
