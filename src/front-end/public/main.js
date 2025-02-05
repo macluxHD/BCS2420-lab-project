@@ -9,7 +9,13 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
         body: data
     })
     .then(response => response.text())
-    .then(result => alert(result));
+    .then(result => {
+        alert(result);
+        if (result === 'Log in successful') {
+            // Redirect to the login page upon successful sign-up
+            window.location.href = '/chat';
+        }
+    });
 
     // Hardcoded credentials (vulnerability)
     const adminUser = 'admin';
