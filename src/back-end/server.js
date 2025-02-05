@@ -12,9 +12,14 @@ app.use(bodyParser.json());
 app.use(express.static('src/front-end/public'));
 
 // Connect to SQLite database (or create if it doesn't exist)
-const db = new sqlite3.Database('./data/vulnerable.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
-    if (err) console.error(err.message);
-    console.log('Connected to SQLite database');
+const dbPath = path.resolve(__dirname, '../../data/vulnerable.db');
+const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
+    if (err) {
+        console.error(err.message);
+        console.error("Resolved DB Path:", dbPath);
+    } else {
+        console.log('Connected to SQLite database');
+    }
 });
 
 // Vulnerable login (SQL Injection possible)
