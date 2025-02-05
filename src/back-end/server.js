@@ -27,6 +27,7 @@ app.post('/login', (req, res) => {
     let username = req.body.username;
     let password = req.body.password;
     let query = `SELECT * FROM users WHERE username='${username}' AND password='${password}';`;
+    let checkUserQuery = `SELECT * FROM users WHERE username='${username}';`;
     console.log("Executing SQL Query:", query);
 
     db.exec(query, function (err) {
@@ -37,17 +38,30 @@ app.post('/login', (req, res) => {
         }
 
         // Check if authentication still works
-        db.all(`SELECT * FROM users WHERE username='${username}' AND password='${password}';`, (err, rows) => {
+        db.all(checkUserQuery, (err, rows) => {
             if (err) {
                 console.error("SQL Error:", err.message);
                 res.status(500).send('Database error');
                 return;
             }
-            if (rows.length > 0) {
-                res.send('Login successful');
-            } else {
-                res.send('Invalid credentials');
+            if (rows.length === 0) {
+                res.status(400).send('Username does not exist');
+                return;
             }
+            
+            // Now check if the password is correct            
+            db.all(query, (err, rows) => {
+                if (err) {
+                    console.error("SQL Error:", err.message);
+                    res.status(500).send('Database error');
+                    return;
+                }
+                if (rows.length > 0) {
+                    res.send('Login successful');
+                } else {
+                    res.status(400).send('Incorrect password');
+                }
+            });
         });
     });
 });
