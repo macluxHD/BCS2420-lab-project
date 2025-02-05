@@ -57,7 +57,12 @@ app.post('/login', (req, res) => {
 
             //TODO: we check if row.password == password that was inputted into the website
             if (row.username == username && row.password == password) {
-                res.send('Login successful');
+                if (row.isAdmin == 1) {
+                    res.send('Login admin');
+
+                } else {
+                    res.send('Login successful');
+                }
             }
             else if (row.username == username && row.password != password) {
                 db.get(`SELECT * FROM users WHERE password = ?;`, [password], (err, passRow) => {

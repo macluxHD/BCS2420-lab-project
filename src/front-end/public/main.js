@@ -13,20 +13,21 @@ document.getElementById('loginForm').addEventListener('submit', function (event)
     })
         .then(response => response.text())
         .then(result => {
-            // alert(result);
-            if (result === 'Login successful') {
-                // Redirect to the login page upon successful sign-up
+            if (result === 'Login admin') {
+                // admin users
+                window.location.href = '/admin';
+            } else if (result === 'Login successful') {
+                // normal users
                 window.location.href = '/chat';
             } else {
+                // fail
                 document.getElementById("user-feedback").innerHTML = result;
                 dialog.showModal();
             }
         });
 
-    // Hardcoded credentials (vulnerability)
-    const adminUser = 'admin';
-    const adminPass = 'password123';
-    // console.log('Admin credentials:', adminUser, adminPass);
+    // const adminUser = 'admin';
+    // const adminPass = 'pass  word123';
 });
 
 const closeButton = document.querySelector("dialog button");
