@@ -2,7 +2,7 @@ const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
 const path = require('path');
-const res = require('express/lib/response');
+const fs = require('fs');
 const ws = require('ws')
 
 const app = express();
@@ -21,6 +21,10 @@ const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CR
         console.log('Connected to SQLite database');
     }
 });
+
+if (!fs.existsSync(dbPath)) {
+    require('./populate-db');
+}
 
 // Vulnerable login (SQL Injection possible)
 app.post('/login', (req, res) => {
