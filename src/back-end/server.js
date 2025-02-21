@@ -11,6 +11,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static('src/front-end/public'));
 
+if (!fs.existsSync(dbPath)) {
+    require('./populate-db');
+}
+
 // Connect to SQLite database (or create if it doesn't exist)
 const dbPath = path.resolve(__dirname, '../../data/vulnerable.db');
 const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
@@ -21,10 +25,6 @@ const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CR
         console.log('Connected to SQLite database');
     }
 });
-
-if (!fs.existsSync(dbPath)) {
-    require('./populate-db');
-}
 
 // Vulnerable login (SQL Injection possible)
 app.post('/login', (req, res) => {
