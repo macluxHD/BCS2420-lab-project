@@ -11,6 +11,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static('src/front-end/public'));
 
+if (!fs.existsSync(dbPath)) {
+    require('./populate-db');
+}
+
 // Connect to SQLite database (or create if it doesn't exist)
 const dbPath = path.resolve(__dirname, '../../data/vulnerable.db');
 const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
@@ -21,10 +25,6 @@ const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CR
         console.log('Connected to SQLite database');
     }
 });
-
-if (!fs.existsSync(dbPath)) {
-    require('./populate-db');
-}
 
 // Vulnerable login (SQL Injection possible)
 app.post('/login', (req, res) => {
@@ -72,21 +72,21 @@ app.post('/login', (req, res) => {
     });
 });
 // Vulnerable signup (SQL Injection possible)
-app.post('/signup', (req, res) => {
-    let username = req.body.username;
-    let password = req.body.password;
-    let query = `INSERT INTO users (username, password) VALUES ('${username}', '${password}');`;
-    console.log("Executing SQL Query:", query);
+// app.post('/signup', (req, res) => {
+//     let username = req.body.username;
+//     let password = req.body.password;
+//     let query = `INSERT INTO users (username, password) VALUES ('${username}', '${password}');`;
+//     console.log("Executing SQL Query:", query);
 
-    db.exec(query, function (err) {
-        if (err) {
-            console.error("SQL Error:", err.message);
-            res.status(500).send('Database error');
-            return;
-        }
-        res.send('Signup successful');
-    });
-});
+//     db.exec(query, function (err) {
+//         if (err) {
+//             console.error("SQL Error:", err.message);
+//             res.status(500).send('Database error');
+//             return;
+//         }
+//         res.send('Signup successful');
+//     });
+// });
 
 // Unauthenticated API endpoint (exposes user data)
 app.get('/users', (req, res) => {
@@ -104,9 +104,9 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'front-end', 'index.html'));
 });
 
-app.get('/signup', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'front-end', 'signup.html'));
-});
+// app.get('/signup', (req, res) => {
+//     res.sendFile(path.join(__dirname, '..', 'front-end', 'signup.html'));
+// });
 
 app.get('/chat', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'front-end', 'chat.html'));
