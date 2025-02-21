@@ -25,9 +25,6 @@ document.getElementById('loginForm').addEventListener('submit', function (event)
                 dialog.showModal();
             }
         });
-
-    // const adminUser = 'admin';
-    // const adminPass = 'pass  word123';
 });
 
 const closeButton = document.querySelector("dialog button");

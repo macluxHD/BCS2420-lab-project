@@ -68,21 +68,6 @@ app.post('/login', (req, res) => {
                     res.send('Login successful');
                 }
             }
-            else if (row.username == username && row.password != password) {
-                db.get(`SELECT * FROM users WHERE password = ?;`, [password], (err, passRow) => {
-                    if (err) {
-                        console.error("SQL Error:", err.message);
-                        res.status(500).send('Database error');
-                        return;
-                    }
-
-                    if (passRow) {
-                        res.send(`The given password belongs to user <span class="user-feedback">${passRow.username}</span>`);
-                    } else {
-                        res.send(`Password for username <code>${row.username}</code> is invalid.`);
-                    }
-                })
-            }
         });
     });
 });
