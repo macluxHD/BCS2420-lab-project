@@ -66,47 +66,21 @@ app.post("/login", (req, res) => {
   let query = `SELECT * FROM users WHERE username='${username}' AND password='${password}';`;
   console.log("Executing SQL Query:", query);
 
-  db.exec(query, function (err) {
+  db.get(query, (err, row) => {
     if (err) {
       console.error("SQL Error:", err.message);
       res.status(500).send("Database error");
       return;
     }
-
-    // Check if authentication still works
-    // MY CHANGES START HERE!!!!!!!!
-    db.get(
-      `SELECT * FROM users WHERE username = ?;`,
-      [username],
-      (err, row) => {
-        if (err) {
-          console.error("SQL Error:", err.message);
-          res.status(500).send("Database error");
-          return;
-        }
-        console.log("Row:", row);
-        // console.log("Row Username:", row.username);
-        // console.log("Row Password:", row.password);
-
-        console.log(row);
-
-        if (!row) {
-          res
-            .status(400)
-            .send(`Username <code>${username}</code> does not exist.`);
-          return;
-        }
-
-        //TODO: we check if row.password == password that was inputted into the website
-        if (row.username == username && row.password == password) {
-          if (row.isAdmin == 1) {
-            res.send("Login admin");
-          } else {
-            res.send("Login successful");
-          }
-        }
+    if (row) {
+      if (row.isAdmin == 1) {
+        res.send("Login admin");
+      } else {
+        res.send("Login successful");
       }
-    );
+    } else {
+      res.status(401).send("Wrong credentials");
+    }
   });
 });
 // Vulnerable signup (SQL Injection possible)
