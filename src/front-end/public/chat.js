@@ -1,38 +1,39 @@
-const ws = new WebSocket(`wss://${window.document.location.host}`);
+const ws = new WebSocket(`wss://${window.location.host}`);
 ws.binaryType = "blob";
 
-ws.addEventListener("open", (event) => {
-  console.log("Websocket connection opened");
+ws.addEventListener("open", () => {
+  console.log("WebSocket connection opened");
 });
-ws.addEventListener("close", (event) => {
-  console.log("Websocket connection closed");
+
+ws.addEventListener("close", () => {
+  console.log("WebSocket connection closed");
 });
-ws.onmessage = function (message) {
+
+ws.addEventListener("message", (message) => {
   const msgDiv = document.createElement("div");
   msgDiv.classList.add("msgCtn");
+
   if (message.data instanceof Blob) {
-    reader = new FileReader();
+    const reader = new FileReader();
     reader.onload = () => {
-      msgDiv.innerHTML = reader.result;
+      msgDiv.textContent = reader.result; // Prevents HTML interpretation
       document.getElementById("messages").appendChild(msgDiv);
-      msgDiv.querySelectorAll("script").forEach((oldScript) => {
-        const newScript = document.createElement("script");
-        newScript.text = oldScript.innerText;
-        document.body.appendChild(newScript);
-        document.body.removeChild(newScript);
-      });
     };
     reader.readAsText(message.data);
   } else {
-    console.log("Result2: " + message.data);
-    msgDiv.innerHTML = message.data;
+    console.log("Received: " + message.data);
+    msgDiv.textContent = message.data; // Prevents HTML interpretation
     document.getElementById("messages").appendChild(msgDiv);
   }
-};
-const form = document.getElementById("msgForm");
-form.addEventListener("submit", (event) => {
+});
+
+document.getElementById("msgForm").addEventListener("submit", (event) => {
   event.preventDefault();
-  const message = document.getElementById("inputBox").value;
-  ws.send(message);
-  document.getElementById("inputBox").value = "";
+  const inputBox = document.getElementById("inputBox");
+  const message = inputBox.value.trim();
+
+  if (message) {
+    ws.send(message);
+    inputBox.value = "";
+  }
 });
