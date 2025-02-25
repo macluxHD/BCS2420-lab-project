@@ -6,6 +6,7 @@ const fs = require("fs");
 const ws = require("ws");
 const https = require("https");
 const rateLimit = require("express-rate-limit");
+const bcrypt = require("bcrypt");
 
 const app = express();
 
@@ -41,7 +42,7 @@ function ensureSecure(req, res, next) {
 // Use the middleware to enforce HTTPS
 app.use(ensureSecure);
 
-const dbPath = path.resolve(__dirname, "../../data/vulnerable.db");
+const dbPath = path.resolve(__dirname, "../../data/secure.db");
 if (!fs.existsSync(dbPath)) {
   require("./populate-db");
 }
@@ -63,18 +64,28 @@ const loginLimiter = rateLimit({
   headers: true,
 });
 
-// Vulnerable login (SQL Injection possible)
+// Secure login (Using bcrypt for password comparison)
 app.post("/login", loginLimiter, (req, res) => {
+  const { username, password } = req.body;
+
   db.get(
-    "SELECT * FROM users WHERE username = ? AND password = ?",
-    [req.body.username, req.body.password],
-    (err, row) => {
+    "SELECT * FROM users WHERE username = ?",
+    [username],
+    async (err, row) => {
       if (err) {
         console.error("SQL Error:", err.message);
         res.status(500).send("Database error");
         return;
       }
-      if (row) {
+
+      if (!row) {
+        res.status(401).send("Wrong credentials");
+        return;
+      }
+
+      // Compare hashed password
+      const isMatch = await bcrypt.compare(password, row.password);
+      if (isMatch) {
         res.send(row.isAdmin == 1 ? "Login admin" : "Login successful");
       } else {
         res.status(401).send("Wrong credentials");
@@ -87,10 +98,6 @@ app.post("/login", loginLimiter, (req, res) => {
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "front-end", "index.html"));
 });
-
-// app.get('/signup', (req, res) => {
-//     res.sendFile(path.join(__dirname, '..', 'front-end', 'signup.html'));
-// });
 
 app.get("/chat", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "front-end", "chat.html"));
