@@ -46,59 +46,34 @@ if (!fs.existsSync(dbPath)) {
 }
 
 // Connect to SQLite database (or create if it doesn't exist)
-const db = new sqlite3.Database(
-  dbPath,
-  sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
-  (err) => {
-    if (err) {
-      console.error(err.message);
-      console.error("Resolved DB Path:", dbPath);
-    } else {
-      console.log("Connected to SQLite database");
-    }
+const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
+  if (err) {
+    console.error(err.message);
+    console.error("Resolved DB Path:", dbPath);
+  } else {
+    console.log("Connected to SQLite database");
   }
-);
+});
 
 // Vulnerable login (SQL Injection possible)
 app.post("/login", (req, res) => {
-  let username = req.body.username;
-  let password = req.body.password;
-  let query = `SELECT * FROM users WHERE username='${username}' AND password='${password}';`;
-  console.log("Executing SQL Query:", query);
-
-  db.get(query, (err, row) => {
-    if (err) {
-      console.error("SQL Error:", err.message);
-      res.status(500).send("Database error");
-      return;
-    }
-    if (row) {
-      if (row.isAdmin == 1) {
-        res.send("Login admin");
-      } else {
-        res.send("Login successful");
+  db.get(
+    "SELECT * FROM users WHERE username = ? AND password = ?",
+    [req.body.username, req.body.password],
+    (err, row) => {
+      if (err) {
+        console.error("SQL Error:", err.message);
+        res.status(500).send("Database error");
+        return;
       }
-    } else {
-      res.status(401).send("Wrong credentials");
+      if (row) {
+        res.send(row.isAdmin == 1 ? "Login admin" : "Login successful");
+      } else {
+        res.status(401).send("Wrong credentials");
+      }
     }
-  });
+  );
 });
-// Vulnerable signup (SQL Injection possible)
-// app.post('/signup', (req, res) => {
-//     let username = req.body.username;
-//     let password = req.body.password;
-//     let query = `INSERT INTO users (username, password) VALUES ('${username}', '${password}');`;
-//     console.log("Executing SQL Query:", query);
-
-//     db.exec(query, function (err) {
-//         if (err) {
-//             console.error("SQL Error:", err.message);
-//             res.status(500).send('Database error');
-//             return;
-//         }
-//         res.send('Signup successful');
-//     });
-// });
 
 // Serve frontend files
 app.get("/", (req, res) => {
