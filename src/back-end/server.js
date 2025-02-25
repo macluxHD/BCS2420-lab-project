@@ -5,6 +5,7 @@ const path = require("path");
 const fs = require("fs");
 const ws = require("ws");
 const https = require("https");
+const rateLimit = require("express-rate-limit");
 
 const app = express();
 
@@ -55,8 +56,15 @@ const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
   }
 });
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Allow max 5 attempts per 15 minutes
+  message: "Too many login attempts. Please try again later.",
+  headers: true,
+});
+
 // Vulnerable login (SQL Injection possible)
-app.post("/login", (req, res) => {
+app.post("/login", loginLimiter, (req, res) => {
   db.get(
     "SELECT * FROM users WHERE username = ? AND password = ?",
     [req.body.username, req.body.password],
