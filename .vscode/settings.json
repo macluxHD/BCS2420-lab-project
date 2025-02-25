@@ -6,5 +6,6 @@
             "name": "test",
             "database": "testing.db"
         }
-    ]
+    ],
+    "editor.formatOnSave": true
 }

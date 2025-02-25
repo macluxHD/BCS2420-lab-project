@@ -1,5 +1,23 @@
 # BCS2420-lab-project
 
+## certificates
+
+Install mkcert
+
+https://github.com/FiloSottile/mkcert?tab=readme-ov-file#installation
+
+Install CA locally
+
+```bash
+mkcert -install
+```
+
+To generate a self-signed certificate
+
+```bash
+mkdir certs && cd certs && mkcert localhost
+```
+
 ## Docker
 
 To start
@@ -15,6 +33,7 @@ docker-compose down
 ```
 
 To see the logs
+
 ```bash
 docker-compose logs -f
 ```
