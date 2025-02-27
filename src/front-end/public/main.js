@@ -7,7 +7,6 @@ document
 
     let formData = new FormData(this);
     let data = new URLSearchParams(formData);
-    console.log(data);
     fetch("/login", {
       method: "POST",
       body: data,
@@ -34,3 +33,10 @@ const closeButton = document.querySelector("dialog button");
 closeButton.addEventListener("click", () => {
   dialog.close();
 });
+
+async function logout() {
+  await fetch("/logout", {
+    method: "POST",
+  });
+  window.location.href = "/";
+}

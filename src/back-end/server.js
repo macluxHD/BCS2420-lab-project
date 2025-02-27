@@ -7,6 +7,8 @@ const ws = require("ws");
 const https = require("https");
 const rateLimit = require("express-rate-limit");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 
@@ -57,6 +59,14 @@ const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
   }
 });
 
+let privateKey;
+if (fs.existsSync("./data/private.key")) {
+  privateKey = fs.readFileSync("./data/private.key", "utf8");
+} else {
+  privateKey = crypto.randomBytes(32).toString("hex");
+  fs.writeFileSync("./data/private.key", privateKey);
+}
+
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // Allow max 5 attempts per 15 minutes
@@ -86,6 +96,19 @@ app.post("/login", loginLimiter, (req, res) => {
       // Compare hashed password
       const isMatch = await bcrypt.compare(password, row.password);
       if (isMatch) {
+        const expiry = 60 * 60; // 1 hour in seconds
+
+        const token = jwt.sign({ username, isAdmin: row.isAdmin }, privateKey, {
+          expiresIn: expiry,
+        });
+
+        res.cookie("token", token, {
+          httpOnly: true, // Prevent access from JavaScript
+          secure: true, // Only send over HTTPS
+          sameSite: "Strict", // Prevent CSRF attacks
+          maxAge: 1000 * expiry,
+        });
+
         res.send(row.isAdmin == 1 ? "Login admin" : "Login successful");
       } else {
         res.status(401).send("Wrong credentials");
@@ -94,17 +117,43 @@ app.post("/login", loginLimiter, (req, res) => {
   );
 });
 
+function authenticateToken(isAdmin = false) {
+  return (req, res, next) => {
+    const cookies = req.headers.cookie?.split(";") || [];
+
+    let token = cookies.find((cookie) => cookie.trim().startsWith("token="));
+
+    if (!token) return res.sendStatus(401);
+
+    token = token.split("=")[1];
+
+    jwt.verify(token, privateKey, (err, user) => {
+      if (err) return res.sendStatus(403);
+
+      if (isAdmin && !user.isAdmin) return res.sendStatus(403);
+
+      req.user = user;
+      next();
+    });
+  };
+}
+
 // Serve frontend files
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "front-end", "index.html"));
 });
 
-app.get("/chat", (req, res) => {
+app.get("/chat", authenticateToken(false), (req, res) => {
   res.sendFile(path.join(__dirname, "..", "front-end", "chat.html"));
 });
 
-app.get("/admin", (req, res) => {
+app.get("/admin", authenticateToken(true), (req, res) => {
   res.sendFile(path.join(__dirname, "..", "front-end", "admin.html"));
+});
+
+app.post("/logout", (req, res) => {
+  res.clearCookie("token");
+  res.sendStatus(200);
 });
 
 // Create WebSocket server using the same HTTPS server instance
