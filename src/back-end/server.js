@@ -63,7 +63,7 @@ let privateKey;
 if (fs.existsSync("./data/private.key")) {
   privateKey = fs.readFileSync("./data/private.key", "utf8");
 } else {
-  privateKey = crypto.randomBytes(32).toString("hex");
+  privateKey = crypto.randomBytes(64).toString("hex");
   fs.writeFileSync("./data/private.key", privateKey);
 }
 
