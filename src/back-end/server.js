@@ -4,27 +4,33 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const fs = require('fs');
 const ws = require('ws')
+const { createDb } = require("./populate-db");
 
 const app = express();
-
+let db;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static('src/front-end/public'));
 
+const dbPath = path.resolve(__dirname, '../../data/vulnerable.db');
 if (!fs.existsSync(dbPath)) {
-    require('./populate-db');
+    createDb();
 }
 
 // Connect to SQLite database (or create if it doesn't exist)
-const dbPath = path.resolve(__dirname, '../../data/vulnerable.db');
-const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
-    if (err) {
-        console.error(err.message);
-        console.error("Resolved DB Path:", dbPath);
-    } else {
-        console.log('Connected to SQLite database');
-    }
-});
+
+function connectToDb() {
+    db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
+        if (err) {
+            console.error(err.message);
+            console.error("Resolved DB Path:", dbPath);
+        } else {
+            console.log('Connected to SQLite database');
+        }
+    });
+}
+
+connectToDb();
 
 // Vulnerable login (SQL Injection possible)
 app.post('/login', (req, res) => {
@@ -37,6 +43,9 @@ app.post('/login', (req, res) => {
         if (err) {
             console.error("SQL Error:", err.message);
             res.status(500).send('Database error');
+            db.close();
+            createDb()
+            connectToDb();
             return;
         }
 
