@@ -33,10 +33,3 @@ const closeButton = document.querySelector("dialog button");
 closeButton.addEventListener("click", () => {
   dialog.close();
 });
-
-async function logout() {
-  await fetch("/logout", {
-    method: "POST",
-  });
-  window.location.href = "/";
-}

@@ -159,11 +159,23 @@ app.post("/logout", (req, res) => {
 // Create WebSocket server using the same HTTPS server instance
 const wss = new ws.WebSocketServer({ server: httpsServer });
 
-wss.on("connection", (client) => {
-  console.log("Client connected !");
-  client.on("message", (msg) => {
-    console.log(`Message:${msg}`);
-    broadcast(msg);
+wss.on("connection", (client, req, res) => {
+  const cookies = req.headers.cookie?.split(";") || [];
+
+  let token = cookies.find((cookie) => cookie.trim().startsWith("token="));
+
+  if (!token) return;
+
+  token = token.split("=")[1];
+
+  jwt.verify(token, privateKey, (err, user) => {
+    if (err) return;
+
+    console.log("Client connected !");
+    client.on("message", (msg) => {
+      console.log(`Message:${msg}`);
+      broadcast(msg);
+    });
   });
 });
 

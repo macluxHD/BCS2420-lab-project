@@ -37,3 +37,10 @@ document.getElementById("msgForm").addEventListener("submit", (event) => {
     inputBox.value = "";
   }
 });
+
+async function logout() {
+  await fetch("/logout", {
+    method: "POST",
+  });
+  window.location.href = "/";
+}
