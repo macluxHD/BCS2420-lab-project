@@ -17,7 +17,6 @@ RUN npm install -g npm
 RUN npm install
 RUN npm rebuild sqlite3 --build-from-source
 RUN npm rebuild bcrypt --build-from-source
-RUN npm run init
 
 # Install certificates for HTTPS
 RUN apk add --no-cache curl
@@ -26,6 +25,7 @@ RUN apk add --no-cache curl
 RUN curl -L -o /usr/local/bin/mkcert "https://dl.filippo.io/mkcert/latest?for=linux/amd64" \
     && chmod +x /usr/local/bin/mkcert
 RUN mkcert -install
+RUN rm -rf certs
 RUN mkdir certs && mkcert -key-file certs/localhost-key.pem -cert-file certs/localhost.pem localhost
 
 # Expose both HTTP and WebSocket ports

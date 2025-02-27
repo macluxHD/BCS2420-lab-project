@@ -1,8 +1,7 @@
 {
   "main": "./src/back-end/server.js",
   "scripts": {
-    "start": "node .",
-    "init": "node ./src/back-end/populate-db.js"
+    "start": "node ."
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

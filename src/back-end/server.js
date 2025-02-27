@@ -9,6 +9,7 @@ const rateLimit = require("express-rate-limit");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
+const { execSync } = require("child_process");
 
 const app = express();
 
@@ -46,7 +47,9 @@ app.use(ensureSecure);
 
 const dbPath = path.resolve(__dirname, "../../data/secure.db");
 if (!fs.existsSync(dbPath)) {
-  require("./populate-db");
+  console.log("Populating database...");
+  execSync("node ./src/back-end/populate-db.js", { stdio: "inherit" });
+  console.log("Database populated.");
 }
 
 // Connect to SQLite database (or create if it doesn't exist)
