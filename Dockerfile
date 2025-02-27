@@ -4,8 +4,8 @@ FROM node:22-alpine
 # Create app directory
 WORKDIR /app
 
-# Install packages to build sqlite3 from source
-RUN apk add --no-cache py3-setuptools make g++
+# Install packages to build sqlite3 and bcrypt from source
+RUN apk --no-cache add --virtual builds-deps build-base py3-setuptools make g++
 
 # Copy package files and install dependencies
 COPY package.json .
@@ -16,6 +16,7 @@ COPY . .
 RUN npm install -g npm
 RUN npm install
 RUN npm rebuild sqlite3 --build-from-source
+RUN npm rebuild bcrypt --build-from-source
 RUN npm run init
 
 # Install certificates for HTTPS

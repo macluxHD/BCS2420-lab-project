@@ -1,8 +1,9 @@
 const fs = require("fs");
 const sqlite3 = require("sqlite3").verbose();
 const bcrypt = require("bcrypt");
+const path = require("path");
 
-const dbFile = "./data/secure.db";
+const dbFile = path.resolve(__dirname, "../../data/secure.db");
 const saltRounds = 10; // Adjust for security vs. performance. The higher the number, the more secure but slower.
 
 // Delete existing database file to overwrite
@@ -16,6 +17,7 @@ const db = new sqlite3.Database(dbFile, (err) => {
     console.error("Error creating database:", err.message);
   } else {
     console.log(`New database '${dbFile}' has been created.`);
+    setupDatabase();
   }
 });
 
@@ -69,5 +71,3 @@ async function setupDatabase() {
     db.close();
   }
 }
-
-setupDatabase();
