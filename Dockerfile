@@ -21,9 +21,15 @@ RUN npm rebuild bcrypt --build-from-source
 # Install certificates for HTTPS
 RUN apk add --no-cache curl
 
-# Install mkcert
-RUN curl -L -o /usr/local/bin/mkcert "https://dl.filippo.io/mkcert/latest?for=linux/amd64" \
-    && chmod +x /usr/local/bin/mkcert
+# Install mkcert based on architecture
+RUN ARCH=$(apk --print-arch) && \
+    if [ "$ARCH" = "aarch64" ]; then \
+    curl -L -o /usr/local/bin/mkcert "https://dl.filippo.io/mkcert/latest?for=linux/arm64"; \
+    else \
+    curl -L -o /usr/local/bin/mkcert "https://dl.filippo.io/mkcert/latest?for=linux/amd64"; \
+    fi && \
+    chmod +x /usr/local/bin/mkcert
+
 RUN mkcert -install
 RUN rm -rf certs
 RUN mkdir certs && mkcert -key-file certs/localhost-key.pem -cert-file certs/localhost.pem localhost
