@@ -1,6 +1,22 @@
 # BCS2420-lab-project
 
-## certificates
+## Installation (manual)
+
+- Tested with Node.js v22
+
+Clone the repository
+
+```bash
+git clone https://github.com/macluxHD/BCS2420-lab-project
+```
+
+Install the dependencies
+
+```bash
+npm install
+```
+
+### HTTPS setup
 
 Install mkcert
 
@@ -14,11 +30,27 @@ mkcert -install
 
 To generate a self-signed certificate
 
+Put the certificate in the `certs` folder
+
 ```bash
-mkdir certs && cd certs && mkcert localhost
+mkdir certs && cd certs
 ```
 
-## Docker
+Generate the certificate
+
+```bash
+mkcert localhost
+```
+
+### Running
+
+Run the server
+
+```bash
+npm start
+```
+
+## Installation (Docker)
 
 To start
 
@@ -37,12 +69,3 @@ To see the logs
 ```bash
 docker-compose logs -f
 ```
-
-## Exploits
-
-- Broken Access control (endpoints no access control)
-- Injection (`admin'; DROP TABLE users; --// `)
-- Insecure design
-- identification and authentication failures (dictionary attacks)
-- Security Logging and Monitoring Failures (No logging)
-- Cryptography failure (No encryption enforced http / passwords not hashed in db)
