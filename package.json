@@ -1,7 +1,7 @@
 {
   "main": "./src/back-end/server.js",
   "scripts": {
-    "start": "node ."
+    "start": "node . | pino-pretty"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -9,7 +9,11 @@
     "express": "^4.21.2",
     "express-rate-limit": "^7.5.0",
     "jsonwebtoken": "^9.0.2",
+    "pino": "^9.6.0",
     "sqlite3": "^5.1.7",
     "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "pino-pretty": "^13.0.0"
   }
 }

@@ -1,3 +1,4 @@
+const logger = require("./logger");
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 const bodyParser = require("body-parser");
@@ -55,8 +56,7 @@ if (!fs.existsSync(dbPath)) {
 // Connect to SQLite database (or create if it doesn't exist)
 const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {
   if (err) {
-    console.error(err.message);
-    console.error("Resolved DB Path:", dbPath);
+    logger.error(`Error connecting to database: ${err.message}`);
   } else {
     console.log("Connected to SQLite database");
   }
@@ -86,7 +86,7 @@ app.post("/login", loginLimiter, (req, res) => {
     [username],
     async (err, row) => {
       if (err) {
-        console.error("SQL Error:", err.message);
+        logger.error(`Database error: ${err.message}`);
         res.status(500).send("Database error");
         return;
       }
@@ -112,12 +112,16 @@ app.post("/login", loginLimiter, (req, res) => {
           maxAge: 1000 * expiry,
         });
 
+        logger.info(`User ${username} logged in from ${req.ip}`);
         res.send(row.isAdmin == 1 ? "Login admin" : "Login successful");
       } else {
+        logger.warn(`Failed login attempt for user ${username} from ${req.ip}`);
         res.status(401).send("Wrong credentials");
       }
     }
   );
+
+  logger.info(`Login attempt for user ${username} from ${req.ip}`);
 });
 
 function authenticateToken(isAdmin = false) {
