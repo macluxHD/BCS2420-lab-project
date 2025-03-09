@@ -28,15 +28,13 @@ Install CA locally
 mkcert -install
 ```
 
-To generate a self-signed certificate
-
 Put the certificate in the `certs` folder
 
 ```bash
 mkdir certs && cd certs
 ```
 
-Generate the certificate
+To generate a self-signed certificate
 
 ```bash
 mkcert localhost
